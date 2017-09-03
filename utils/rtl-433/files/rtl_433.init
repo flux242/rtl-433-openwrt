@@ -1,0 +1,123 @@
+#!/bin/sh /etc/rc.common
+
+START=99
+USE_PROCD=1
+
+PROG=/usr/bin/rtl_433
+
+append_arg() {
+	local cfg="$1"
+	local var="$2"
+	local opt="$3"
+	local def="$4"
+	local val
+
+	config_get val "$cfg" "$var"
+	[ -n "$val" -o -n "$def" ] && procd_append_param command "$opt" "${val:-$def}"
+}
+
+append_bool() {
+	local cfg="$1"
+	local var="$2"
+	local opt="$3"
+	local def="$4"
+	local val
+
+	config_get_bool val "$cfg" "$var" "$def"
+	[ "$val" = 1 ] && procd_append_param command "$opt"
+}
+
+append_list() {
+	local cfg="$1"
+	local var="$2"
+	local opt="$3"
+	local vals entry
+
+	config_get vals "$cfg" "$var"
+	[ -n "$vals" ] && {
+		for entry in $vals; do
+			procd_append_param command "$opt" "$entry"
+		done
+	}
+}
+
+validate_rtl_433_section()
+{
+        uci_validate_section "rtl_433" "rtl_433" "${1}" \
+		'enabled:bool' \
+		'runtime:uinteger' \
+		'respawn_interval:uinteger' \
+		'device:string' \
+		'gain:float' \
+		'frequencies:uinteger' \
+		'hop_time:uinteger' \
+		'ppm_error:uinteger' \
+		'sample_rate:uinteger' \
+		'demodulators:uinteger' \
+		'level:float' \
+		'short_value:uinteger' \
+		'long_value:uinteger' \
+		'samples:uinteger' \
+		'units:or("si", "native", "customary")' \
+		'utc:bool' \
+		'output:string'
+
+	return $?
+}
+
+load_rtl_433() {
+	local cfg="$1"
+	local enabled
+	local respawn_interval=3540
+
+	validate_rtl_433_section "$cfg" || { echo "validation failed"; return 1; }
+
+	config_get enabled "$cfg" enabled
+	[ "$enabled" = "1" ] || return 1
+
+	config_get cfg_respawn_interval "$cfg" respawn_interval
+	[ -n "$cfg_respawn_interval" ] && respawn_interval="$cfg_respawn_interval"
+
+	procd_open_instance
+	procd_set_param command "$PROG" -q
+
+#	append_arg  "$cfg" runtime "-T" "60"
+	append_arg  "$cfg" runtime "-T"
+
+#	Tuner options
+	append_arg  "$cfg" device "-d"
+	append_arg  "$cfg" gain "-g"
+	append_list "$cfg" frequencies "-f"
+	append_arg  "$cfg" hop_time "-h"
+	append_arg  "$cfg" ppm_error "-p"
+	append_arg  "$cfg" sample_rate "-s"
+#	Demodulator options
+	append_list "$cfg" demodulators "-R"
+	append_arg  "$cfg" level "-l"
+	append_arg  "$cfg" short_value "-z"
+	append_arg  "$cfg" long_value "-x"
+	append_arg  "$cfg" samples "-n"
+#	File I/O options
+	append_arg  "$cfg" units "-C"
+	append_bool "$cfg" utc "-U"
+	append_list "$cfg" output "-F"
+
+	procd_set_param stdout 0
+	procd_set_param stderr 0
+
+	procd_set_param respawn 0 $respawn_interval 0
+	procd_close_instance
+}
+
+start_service() {
+	config_load "rtl_433"
+	config_foreach load_rtl_433 "rtl_433"
+}
+
+service_triggers() {
+	procd_add_reload_trigger "rtl_433"
+
+	procd_open_validate
+	validate_rtl_433_section
+	procd_close_validate
+}
