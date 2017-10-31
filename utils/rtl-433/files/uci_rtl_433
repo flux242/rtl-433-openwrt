@@ -2,7 +2,7 @@ config rtl_433
 #	option runtime		60
 	option device		0
 	option respawn_interval	300
-	option utc		1
+	option utc		0
 	option units		si
 	option ppm_error	46
 	list demodulators	"20"

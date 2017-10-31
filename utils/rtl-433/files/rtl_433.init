@@ -102,7 +102,7 @@ load_rtl_433() {
 	append_bool "$cfg" utc "-U"
 	append_list "$cfg" output "-F"
 
-	procd_set_param stdout 0
+	procd_set_param stdout 1
 	procd_set_param stderr 0
 
 	procd_set_param respawn 0 $respawn_interval 0

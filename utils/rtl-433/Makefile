@@ -9,7 +9,7 @@ PKG_SOURCE_URL:=https://github.com/merbanan/rtl_433.git
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
 PKG_SOURCE_DATE:=2017-09-03
 PKG_SOURCE_VERSION:=c6e79a33bd443d271b8d35ccd29d32e709ff9382
-#PKG_MIRROR_HASH:=79314a37709ca1ebd5fcb07b3bbcbadfad17cf5a1e7c53abba4d4be812993cc3
+# PKG_MIRROR_HASH:=79314a37709ca1ebd5fcb07b3bbcbadfad17cf5a1e7c53abba4d4be812993cc3
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION).tar.gz
 CMAKE_INSTALL:=1
 
@@ -27,8 +27,7 @@ define Package/rtl-433/Default
 endef
 
 define Package/rtl-433/Default/description
-  rtl_433 turns your Realtek RTL2832 based DVB dongle into a 433.92MHz
-  generic data receiver
+  rtl_433 turns your Realtek RTL2832 based DVB dongle into a 433.92MHz generic data receiver
 endef
 
 define Package/rtl-433
@@ -40,8 +39,6 @@ endef
 
 define Package/rtl-433/description
   $(call Package/rtl-sdr/Default/description)
-
-  This package contains the rtl-433 daemon and.
 endef
 
 define Package/rtl-433/conffiles
