@@ -1,5 +1,4 @@
 config rtl_433
-#	option runtime		60
 	option device		0
 	option respawn_interval	300
 	option utc		0
@@ -7,5 +6,4 @@ config rtl_433
 	option ppm_error	46
 	list demodulators	"20"
 	list output		"json"
-#	list output		"json:/tmp/sensors433.json"
 	option enabled		1
